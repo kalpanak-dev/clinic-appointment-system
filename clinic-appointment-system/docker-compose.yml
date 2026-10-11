@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: clinic
+      MYSQL_USER: clinic
+      MYSQL_PASSWORD: clinic
+      MYSQL_ROOT_PASSWORD: root
+    ports: ["3306:3306"]
+    volumes: [mysqldata:/var/lib/mysql]
+  mailhog:
+    image: mailhog/mailhog
+    ports: ["1025:1025", "8025:8025"]   # SMTP and web UI (http://localhost:8025)
+  backend:
+    build: ./backend
+    depends_on: [mysql, mailhog]
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/clinic
+      MAIL_HOST: mailhog
+      JWT_SECRET: ${JWT_SECRET:-change-this-secret-change-this-secret-change-this-1234}
+    ports: ["8080:8080"]
+volumes:
+  mysqldata:
